@@ -17,3 +17,7 @@ export interface ConfigType {
   description?: string;
   default?: boolean;
 }
+
+export interface User {
+  email: string;
+}

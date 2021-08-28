@@ -1,4 +1,4 @@
-import Help from "./Help";
+import Help from './Help';
 
 interface NavBarProps {
   title: string;
