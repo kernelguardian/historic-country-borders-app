@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { supabase } from '../../util/initSupabase';
 import { GetServerSideProps } from 'next';
-import { User } from '../../util/types';
+import { User } from '@supabase/gotrue-js';
 
 interface ProfileProps {
   user: User;
@@ -37,7 +37,7 @@ export const getServerSideProps: GetServerSideProps<ProfileProps> = async ({
   req,
 }) => {
   const { user } = await supabase.auth.api.getUserByCookie(req);
-
+  console.log(user);
   if (!user) {
     // If no user, redirect to index.
     return { props: {}, redirect: { destination: '/', permanent: false } };

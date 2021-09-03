@@ -1,3 +1,5 @@
+import { User } from '@supabase/gotrue-js';
+
 export interface GithubFileInfoType {
   name: string;
   path: string;
@@ -18,6 +20,4 @@ export interface ConfigType {
   default?: boolean;
 }
 
-export interface User {
-  email: string;
-}
+export interface AuthUser extends User {}
