@@ -21,7 +21,7 @@ export const useRomeData = (year: number, theaters: Theater[]) => {
   const [data, setData] = useState<TheaterData | []>([]);
 
   const diff = (main: Theater[], other: Theater[]) =>
-    main.filter((x) => !other.includes(x));
+    main.filter((x) => !other.some((y) => y.id === x.id));
 
   const injectLayout = (fe: FeatureCollection, style: MapStyle) =>
     ({
@@ -61,17 +61,22 @@ export const useRomeData = (year: number, theaters: Theater[]) => {
   };
 
   const convert = (year: number, theaters: Theater[]) => {
-    const currentTh = theaters.filter((x) => x.created === year);
-    const notCurrent = diff(theaters, currentTh);
-    const unknowns = notCurrent.filter((x) => !x.created);
-    const notUnknown = diff(notCurrent, unknowns);
-    const inUses = notUnknown.filter((x) => {
+    const unknowns = theaters.filter((x) => !x.created);
+    const notUnknown = diff(theaters, unknowns);
+    console.log(
+      'notUnknown',
+      notUnknown.filter((x) => !x.created),
+    );
+    const currentTh = notUnknown.filter((x) => x.created === year);
+    const notCurrent = diff(notUnknown, currentTh);
+    const inUses = notCurrent.filter((x) => {
       if (x.lastUse) {
         return year > x.created! && year < x.lastUse;
       }
-      return Math.abs(x.created! - year) < 100;
+      const difference = year - x.created!;
+      return difference < 100 && difference > 0;
     });
-    const notInUses = diff(notUnknown, inUses);
+    const notInUses = diff(notCurrent, inUses);
     const notBorn = notInUses.filter((x) => x.created! > year);
     const live = diff(notInUses, notBorn);
     const deads = live.filter((x) => {
