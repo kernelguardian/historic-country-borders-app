@@ -4,8 +4,6 @@ import winkNLP from 'wink-nlp';
 // @ts-ignore
 import its from 'wink-nlp/src/its';
 // @ts-ignore
-import as from 'wink-nlp/src/as';
-// @ts-ignore
 import model from 'wink-eng-lite-model';
 
 const nlp = winkNLP(model);
