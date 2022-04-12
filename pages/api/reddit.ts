@@ -1,5 +1,14 @@
 import { Feature, Geometry, Point } from 'geojson';
 import { NextApiHandler } from 'next';
+import winkNLP from 'wink-nlp';
+// @ts-ignore
+import its from 'wink-nlp/src/its';
+// @ts-ignore
+import as from 'wink-nlp/src/as';
+// @ts-ignore
+import model from 'wink-eng-lite-model';
+
+const nlp = winkNLP(model);
 
 const baseUrl = 'https://www.reddit.com/r';
 
@@ -17,23 +26,26 @@ const handler: NextApiHandler = async (req, res) => {
   const {
     query: { url },
   } = req;
-  console.log('REQ Query', url);
   if (url) {
     try {
       const urlString = url as string;
       if (urlString.includes('/comments/')) {
-        return;
+        return res.end();
       }
       const resp = await fetch(`${baseUrl}${urlString}.json`);
 
-      const data = (await resp.json()) as SubredditData;
-      console.log(data);
-      return;
+      const data = (await resp.json()) as any;
+      const allDateData = data.data.children.flatMap((x) =>
+        convertPostToFeature(x.data),
+      );
+
+      return res.json({ allDateData });
     } catch (error) {
-      res.status(500).send({ error });
+      console.log(error);
+      return res.status(500).send({ error });
     }
   }
-  res.status(404).send({ error: 'Not Found' });
+  return res.status(404).send({ error: 'Not Found' });
 };
 
 export default handler;
@@ -41,17 +53,21 @@ export default handler;
 const convertPostToFeature = (post: RedditPost) => {
   const title = post.title;
   const body = post.selftext_html;
-  return {
-    type: 'Feature',
-    geometry: {
-      type: 'Point',
-      coordinates: [0, 0],
-    } as Point,
-    properties: {
-      title,
-      body,
-    },
-  } as Feature;
+  const timelineDates = parseDateFromText(post.selftext);
+  return timelineDates.length > 0
+    ? ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [0, 0],
+        } as Point,
+        properties: {
+          date: timelineDates,
+          title,
+          body,
+        },
+      } as Feature)
+    : [];
 };
 
 const getGeocoding = async (location: string) => {
@@ -60,4 +76,37 @@ const getGeocoding = async (location: string) => {
   );
   const data = await resp.json();
   console.log('data', data);
+};
+
+const parseDateFromText = (text: string) => {
+  const timelines: string[] = [];
+  const doc = nlp.readDoc(text);
+  doc
+    .entities()
+    .filter((e) => {
+      var shapes = e.tokens().out(its.shape);
+      // We only want dates that can be converted to an actual
+      // time using new Date()
+      return (
+        e.out(its.type) === 'DATE' &&
+        (shapes[0] === 'dddd' ||
+          (shapes[0] === 'Xxxxx' && shapes[1] === 'dddd') ||
+          (shapes[0] === 'Xxxx' && shapes[1] === 'dddd') ||
+          (shapes[0] === 'dd' &&
+            shapes[1] === 'Xxxxx' &&
+            shapes[2] === 'dddd') ||
+          (shapes[0] === 'dd' &&
+            shapes[1] === 'Xxxx' &&
+            shapes[2] === 'dddd') ||
+          (shapes[0] === 'd' &&
+            shapes[1] === 'Xxxxx' &&
+            shapes[2] === 'dddd') ||
+          (shapes[0] === 'd' && shapes[1] === 'Xxxx' && shapes[2] === 'dddd'))
+      );
+    })
+    .each((e) => {
+      timelines.push(e.out());
+    });
+
+  return timelines;
 };
