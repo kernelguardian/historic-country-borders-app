@@ -12,17 +12,12 @@ export const useRedditData = (year: string) => {
   const { query: { reddit } = {} } = useRouter();
 
   const { data, error } = useSWR(reddit as string, fetcher);
-
   const featuresByYear = useMemo(
     () =>
       ({
-        features: data?.features? .filter((x) =>
+        features: data?.features?.filter((x) =>
           x.properties?.unixTime?.some((x: number) => {
-            console.log({ x, d1: new Date(x * 1000).getFullYear() });
-
             const diff = new Date(x * 1000).getFullYear() - Number(year);
-            console.log({ diff });
-
             return Math.abs(diff) <= 50;
           }),
         ),
@@ -30,8 +25,6 @@ export const useRedditData = (year: string) => {
       } as FeatureCollection),
     [year, data],
   );
-
-  console.log({ featuresByYear });
 
   return {
     data: featuresByYear,

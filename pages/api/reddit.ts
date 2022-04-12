@@ -35,13 +35,10 @@ const handler: NextApiHandler = async (req, res) => {
       const resp = await fetch(`${baseUrl}${urlString}.json`);
 
       const data = (await resp.json()) as SubredditData;
-      console.log(data.data.children.length);
-
       // @ts-ignore
       const allDateData = data.data.children.flatMap(
         (x: { data: RedditPost }) => convertPostToFeature(x.data),
       ) as Feature[];
-      console.log(allDateData.length);
       return res.json({
         features: allDateData,
         type: 'FeatureCollection',
@@ -112,9 +109,18 @@ const parseDateFromText = (text: string) => {
       );
     })
     .each((e) => {
+      let date = e.out();
+      const hasLetters = /[a-zA-Z]/i.test(date);
+      if (hasLetters) {
+        const isAD = /[aA]/i.test(date);
+        date = date.replace(/\D/g, '');
+        if (!isAD) {
+          date = '-'.concat(date);
+        }
+      }
       timelines.push({
-        date: e.out(),
-        unixTime: new Date(e.out()).getTime() / 1000,
+        date,
+        unixTime: new Date(date).getTime() / 1000,
       });
     });
 
