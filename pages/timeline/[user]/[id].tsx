@@ -54,6 +54,7 @@ const Viewer = ({
     if (dPress) {
       router.push({
         query: {
+          ...router.query,
           year: years[mod(index + 1, years.length)],
         },
       });
@@ -64,6 +65,7 @@ const Viewer = ({
     if (aPress) {
       router.push({
         query: {
+          ...router.query,
           year: years[mod(index - 1, years.length)],
         },
       });
@@ -125,6 +127,7 @@ const Viewer = ({
                   onChange={(v) =>
                     router.push({
                       query: {
+                        ...router.query,
                         year: years[v],
                       },
                     })
