@@ -47,7 +47,7 @@ const MapContainer = ({
   threeD = true,
 }: MapContainerProps) => {
   const { data: { data, places } = {}, isLoading } = useData(year, user, id);
-  const { data: reddit } = useRedditData();
+  const { data: reddit } = useRedditData(year);
   const [zoomValue, setZoomValue] = useState(2);
   const mapRef = useRef<MapboxGl.Map | undefined>(undefined);
   const globeRef = useRef<any>(undefined);

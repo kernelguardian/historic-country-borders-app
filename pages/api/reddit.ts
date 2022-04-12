@@ -1,4 +1,4 @@
-import { Feature, Geometry, Point } from 'geojson';
+import { Feature, FeatureCollection, Geometry, Point } from 'geojson';
 import { NextApiHandler } from 'next';
 import winkNLP from 'wink-nlp';
 // @ts-ignore
@@ -11,7 +11,9 @@ const nlp = winkNLP(model);
 const baseUrl = 'https://www.reddit.com/r';
 
 interface SubredditData {
-  children: { data: RedditPost }[];
+  data: {
+    children: { data: RedditPost }[];
+  };
 }
 
 interface RedditPost {
@@ -32,12 +34,18 @@ const handler: NextApiHandler = async (req, res) => {
       }
       const resp = await fetch(`${baseUrl}${urlString}.json`);
 
-      const data = (await resp.json()) as any;
-      const allDateData = data.data.children.flatMap((x) =>
-        convertPostToFeature(x.data),
-      );
+      const data = (await resp.json()) as SubredditData;
+      console.log(data.data.children.length);
 
-      return res.json({ allDateData });
+      // @ts-ignore
+      const allDateData = data.data.children.flatMap(
+        (x: { data: RedditPost }) => convertPostToFeature(x.data),
+      ) as Feature[];
+      console.log(allDateData.length);
+      return res.json({
+        features: allDateData,
+        type: 'FeatureCollection',
+      } as FeatureCollection);
     } catch (error) {
       console.log(error);
       return res.status(500).send({ error });
@@ -60,7 +68,8 @@ const convertPostToFeature = (post: RedditPost) => {
           coordinates: [0, 0],
         } as Point,
         properties: {
-          date: timelineDates,
+          date: timelineDates.map((x) => x.date),
+          unixTime: timelineDates.map((x) => x.unixTime),
           title,
           body,
         },
@@ -77,7 +86,7 @@ const getGeocoding = async (location: string) => {
 };
 
 const parseDateFromText = (text: string) => {
-  const timelines: string[] = [];
+  const timelines: any[] = [];
   const doc = nlp.readDoc(text);
   doc
     .entities()
@@ -103,7 +112,10 @@ const parseDateFromText = (text: string) => {
       );
     })
     .each((e) => {
-      timelines.push(e.out());
+      timelines.push({
+        date: e.out(),
+        unixTime: new Date(e.out()).getTime() / 1000,
+      });
     });
 
   return timelines;
