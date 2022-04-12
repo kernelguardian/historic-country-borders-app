@@ -21,6 +21,7 @@ import text from '../util/Roboto_Regular.json';
 import { MapEvent } from 'react-mapbox-gl/lib/map-events';
 import { useWikiData } from '../hooks/useWiki';
 import toast from 'react-hot-toast';
+import { useRedditData } from '../hooks/useRedditData';
 
 const GlobeTmpl = dynamic(() => import('../util/GlobeWrapper'), {
   ssr: false,
@@ -46,6 +47,7 @@ const MapContainer = ({
   threeD = true,
 }: MapContainerProps) => {
   const { data: { data, places } = {}, isLoading } = useData(year, user, id);
+  const { data: reddit } = useRedditData({ year });
   const [zoomValue, setZoomValue] = useState(2);
   const mapRef = useRef<MapboxGl.Map | undefined>(undefined);
   const globeRef = useRef<any>(undefined);
