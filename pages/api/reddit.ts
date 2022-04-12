@@ -15,7 +15,7 @@ interface RedditPost {
 
 const handler: NextApiHandler = async (req, res) => {
   const {
-    query: { url, year },
+    query: { url },
   } = req;
   console.log('REQ Query', url);
   if (url) {

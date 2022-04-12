@@ -7,7 +7,7 @@ const fetcher: Fetcher<FeatureCollection, string> = (url) =>
     .then((x) => x.json())
     .catch((e) => e);
 
-export const useRedditData = ({ year }: { year: string }) => {
+export const useRedditData = () => {
   const { query: { reddit } = {} } = useRouter();
 
   const { data, error } = useSWR(reddit as string, fetcher);
