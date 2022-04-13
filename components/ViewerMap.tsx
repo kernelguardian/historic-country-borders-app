@@ -247,9 +247,9 @@ const MapContainer = ({
                   'text-transform': 'uppercase',
                 }}
               />
-              {places && (
+              {reddit && (
                 <GeoJSONLayer
-                  data={places}
+                  data={reddit}
                   symbolPaint={{
                     'text-color': '#3d3d3d',
                   }}
