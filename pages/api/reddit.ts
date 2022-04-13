@@ -5,6 +5,8 @@ import winkNLP from 'wink-nlp';
 import its from 'wink-nlp/src/its';
 // @ts-ignore
 import model from 'wink-eng-lite-model';
+// @ts-ignore
+import nlpC from 'compromise';
 
 const nlp = winkNLP(model);
 
@@ -21,6 +23,12 @@ interface RedditPost {
   selftext_html: string;
   selftext: string;
 }
+
+const getLocation = (text: string) => {
+  let doc = nlpC(text);
+  let str = doc.places();
+  console.log({str});
+};
 
 const handler: NextApiHandler = async (req, res) => {
   const {
@@ -57,6 +65,7 @@ const convertPostToFeature = (post: RedditPost) => {
   const title = post.title;
   const body = post.selftext_html;
   const timelineDates = parseDateFromText(post.selftext);
+  const location = getLocation(post.selftext);
   return timelineDates.length > 0
     ? ({
         type: 'Feature',
