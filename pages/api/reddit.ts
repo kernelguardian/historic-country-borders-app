@@ -27,7 +27,7 @@ interface RedditPost {
 const getLocation = (text: string) => {
   let doc = nlpC(text);
   let str = doc.places();
-  console.log({str});
+  console.log({ str, text });
 };
 
 const handler: NextApiHandler = async (req, res) => {
