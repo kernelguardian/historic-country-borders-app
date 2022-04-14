@@ -58,6 +58,8 @@ const MapContainer = ({
   const [popupPos, setPopupPos] = useState([0, 0]);
   const wikiInfo = useWikiData(selectedPlace);
 
+  console.log({ reddit });
+
   useEffect(() => {
     const id = 'loading';
     if (isLoading) {

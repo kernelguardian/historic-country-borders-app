@@ -27,7 +27,7 @@ interface RedditPost {
 const getLocation = (text: string) => {
   let doc = nlpC(text);
   let str = doc.places();
-  console.log({ str, text });
+  return str.json().values[0]?.text;
 };
 
 const handler: NextApiHandler = async (req, res) => {
@@ -43,12 +43,16 @@ const handler: NextApiHandler = async (req, res) => {
       const resp = await fetch(`${baseUrl}${urlString}.json`);
 
       const data = (await resp.json()) as SubredditData;
+      const allDateData = (await Promise.all(
+        data.data.children.map(async (x: { data: RedditPost }) =>
+          convertPostToFeature(x.data),
+        ),
+      )) as Feature[];
       // @ts-ignore
-      const allDateData = data.data.children.flatMap(
-        (x: { data: RedditPost }) => convertPostToFeature(x.data),
-      ) as Feature[];
+      const removeUndefined = allDateData.filter((x) => x);
+      console.log({ g: removeUndefined[0].geometry });
       return res.json({
-        features: allDateData,
+        features: removeUndefined,
         type: 'FeatureCollection',
       } as FeatureCollection);
     } catch (error) {
@@ -61,18 +65,19 @@ const handler: NextApiHandler = async (req, res) => {
 
 export default handler;
 
-const convertPostToFeature = (post: RedditPost) => {
+const convertPostToFeature = async (post: RedditPost) => {
   const title = post.title;
   const body = post.selftext_html;
   const timelineDates = parseDateFromText(post.selftext);
   const location = getLocation(post.selftext);
-  return timelineDates.length > 0
+  const coord = await getGeocoding(location);
+  return timelineDates.length > 0 && coord
     ? ({
         type: 'Feature',
         geometry: {
           type: 'Point',
-          coordinates: [0, 0],
-        } as Point,
+          coordinates: coord,
+        },
         properties: {
           date: timelineDates.map((x) => x.date),
           unixTime: timelineDates.map((x) => x.unixTime),
@@ -80,14 +85,15 @@ const convertPostToFeature = (post: RedditPost) => {
           body,
         },
       } as Feature)
-    : [];
+    : undefined;
 };
 
 const getGeocoding = async (location: string) => {
   const resp = await fetch(
     `https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=pk.eyJ1IjoibnJnYXBwbGUiLCJhIjoiY2trN2E1YnVvMGJ4OTJwbWptM25waHVmNyJ9.UxvOXdAatpV-H1AXQQ23Kg`,
   );
-  const data = await resp.json();
+  const data = (await resp.json()) as FeatureCollection;
+  return (data?.features[0]?.geometry as Point).coordinates;
   console.log('data', data);
 };
 
