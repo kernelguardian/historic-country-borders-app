@@ -31,26 +31,27 @@ export default function FeedbackWidget({
   customIcon,
 }: IFeedbackWidget) {
   return (
-    <FeedbackProvider
-      user={user}
-      metadata={metadata}
-      type={type}
-      apiPath={apiPath}
-      themeColor={themeColor}
-      textColor={textColor}
-      showOnInitial={showOnInitial}
-    >
-      <div
-        className="feedback-widget"
-        style={{
-          // @ts-ignore
-          '--color-primary': themeColor,
-          '--color-text': textColor,
-        }}
-      >
-        <TriggerButton>{customIcon}</TriggerButton>
-        <FeedbackModal title={title} description={description} />
-      </div>
-    </FeedbackProvider>
+    <></>
+    // <FeedbackProvider
+    //   user={user}
+    //   metadata={metadata}
+    //   type={type}
+    //   apiPath={apiPath}
+    //   themeColor={themeColor}
+    //   textColor={textColor}
+    //   showOnInitial={showOnInitial}
+    // >
+    //   <div
+    //     className="feedback-widget"
+    //     style={{
+    //       // @ts-ignore
+    //       '--color-primary': themeColor,
+    //       '--color-text': textColor,
+    //     }}
+    //   >
+    //     <TriggerButton>{customIcon}</TriggerButton>
+    //     {/* <FeedbackModal title={title} description={description} /> */}
+    //   </div>
+    // </FeedbackProvider>
   );
 }

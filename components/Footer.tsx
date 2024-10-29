@@ -14,7 +14,6 @@ export default function Footer({
   return (
     <div className="footer">
       <div>
-        <div className="logo">🌎 HistoricBorders.app</div>
         {!!lastCommit && (
           <div className="last-commit">
             <span>
@@ -36,13 +35,14 @@ export default function Footer({
             here
           </a>{' '} */}
         </div>
-        <div>
+        {/* <div>
           <a href="https://github.com/nrgapple/historic-country-borders-app">
             ⭐️ Star this on Github!
           </a>
-        </div>
+        </div> */}
         <div>
-          <a href={discussionUrl}>💬 Join the community!</a>
+          <a href={"https://historicborders.app/"}>Original Creator</a>
+          {/* Hosting on my own because I will use it frequently and needs to add custom data */}
         </div>
       </div>
     </div>
