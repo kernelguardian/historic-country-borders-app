@@ -11,7 +11,7 @@ import FeedbackWidget from '../components/feedback';
 import '../components/feedback/styles.css';
 import ReactGA4 from 'react-ga4';
 
-ReactGA4.initialize(process.env.NEXT_GA_MEASUREMENT_ID);
+ReactGA4.initialize("G-KDJM80BSPW");
 
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
